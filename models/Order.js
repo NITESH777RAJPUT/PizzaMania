@@ -31,10 +31,15 @@ const orderSchema = new mongoose.Schema({
     default: 0
   },
   feedback: {
-    type: Number,
-    min: 1,
-    max: 5,
-    default: null
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5
+    },
+    comment: {
+      type: String,
+      default: ''
+    }
   },
   createdAt: { type: Date, default: Date.now },
 });

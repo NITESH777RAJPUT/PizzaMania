@@ -248,8 +248,8 @@ router.get('/admin/summary', async (req, res) => {
 });
 
 // ✅ Feedback route
-router.post('/feedback/:order_id', async (req, res) => {
-  const { rating } = req.body;
+router.post('/:order_id/feedback', async (req, res) => {
+  const { rating, comment } = req.body;
 
   if (!rating || isNaN(rating) || rating < 1 || rating > 5) {
     return res.status(400).json({ error: 'Invalid rating. Must be 1-5 stars.' });
@@ -262,14 +262,15 @@ router.post('/feedback/:order_id', async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    order.feedback = rating;
+    order.feedback = { rating, comment }; // ✅ store both
     await order.save();
 
-    res.status(200).json({ message: 'Feedback saved successfully', feedback: rating });
+    res.status(200).json({ message: 'Feedback saved successfully', feedback: order.feedback });
   } catch (error) {
     console.error('Error saving feedback:', error.message);
     res.status(500).json({ error: 'Failed to save feedback', details: error.message });
   }
 });
+
 
 module.exports = router;
