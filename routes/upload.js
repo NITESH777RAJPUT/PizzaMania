@@ -5,13 +5,13 @@ const fs = require('fs');
 
 const router = express.Router();
 
-// Make sure upload folder exists
+// 📁 Ensure uploads folder exists
 const uploadPath = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadPath)) {
   fs.mkdirSync(uploadPath);
 }
 
-// Multer storage config
+// 📦 Configure Multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadPath);
@@ -24,10 +24,15 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// 📤 Route to upload image
+// 📤 Upload Route
 router.post('/photo', upload.single('photo'), (req, res) => {
-  const fileUrl = `https://pizzamania-0igb.onrender.com/uploads/${req.file.filename}`;
-  res.json({ url: fileUrl });
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
+
+  const filename = req.file.filename;
+  const fileUrl = `https://pizzamania-0igb.onrender.com/uploads/${filename}`;
+  res.json({ filename, url: fileUrl }); // ✅ Return both
 });
 
 module.exports = router;
