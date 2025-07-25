@@ -26,7 +26,7 @@ const upload = multer({ storage: storage });
 
 // 📤 Route to upload image
 router.post('/photo', upload.single('photo'), (req, res) => {
-  const fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+  const fileUrl = `https://pizzamania-0igb.onrender.com/uploads/${req.file.filename}`;
   res.json({ url: fileUrl });
 });
 
