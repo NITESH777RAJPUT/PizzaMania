@@ -1,38 +1,36 @@
 const express = require('express');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('cloudinary').v2;
 
 const router = express.Router();
 
-// 📁 Ensure uploads folder exists
-const uploadPath = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadPath)) {
-  fs.mkdirSync(uploadPath);
-}
-
-// 📦 Configure Multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadPath);
-  },
-  filename: function (req, file, cb) {
-    const uniqueName = Date.now() + '-' + file.originalname;
-    cb(null, uniqueName);
-  }
+// 🔐 Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-const upload = multer({ storage: storage });
+// ☁️ Configure Multer Storage with Cloudinary
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'pizzamania_profiles',
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+  },
+});
 
-// 📤 Upload Route
+const upload = multer({ storage });
+
+// 📤 Upload Route (POST /api/upload/photo)
 router.post('/photo', upload.single('photo'), (req, res) => {
-  if (!req.file) {
+  if (!req.file || !req.file.path) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
 
-  const filename = req.file.filename;
-  const fileUrl = `https://pizzamania-0igb.onrender.com/uploads/${filename}`;
-  res.json({ filename, url: fileUrl }); // ✅ Return both
+  const imageUrl = req.file.path;
+  res.json({ imageUrl });
 });
 
 module.exports = router;
